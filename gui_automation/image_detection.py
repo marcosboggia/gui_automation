@@ -1,7 +1,7 @@
 # Made by Marcos Boggia
 
 import cv2
-from spot import Spot
+from gui_automation.spot import Spot
 import numpy as np
 from pyautogui import screenshot
 

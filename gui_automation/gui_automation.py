@@ -1,7 +1,7 @@
 # Made by Marcos Boggia
 
-import image_detection as imgd
-import mouse
+import gui_automation.image_detection as imgd
+import gui_automation.mouse as mouse
 
 
 def detect(tpl, similarity_threshold, method=imgd.TM_SQDIFF_NORMED, thresh=False):
