@@ -1,5 +1,5 @@
 import setuptools
-with open("gui_automation/README.md", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
     name='gui_automation',
