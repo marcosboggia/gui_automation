@@ -12,6 +12,10 @@ def click(x, y, clicks=1):
     pyautogui.click(x=x, y=y, button='left', clicks=clicks, interval=0.5)
 
 
+def move(x, y):
+    pyautogui.moveTo(x=x, y=y)
+
+
 def hold_click(x, y, time):
     pyautogui.PAUSE = 0
     refresh_rate = 0.05

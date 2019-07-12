@@ -1,1 +1,4 @@
 .idea/
+gui_automation/__pycache__/
+gui_automation/tests/
+example.py

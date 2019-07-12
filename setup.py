@@ -3,7 +3,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
     name='gui_automation',
-    version='1',
+    version='2',
     author="Marcos Boggia",
     author_email="marcos_boggia@hotmail.com",
     description="Simple python library useful for automating tasks using images.",

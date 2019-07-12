@@ -4,6 +4,7 @@ import cv2
 from gui_automation.spot import Spot
 import numpy as np
 from pyautogui import screenshot
+import imutils
 
 
 TM_SQDIFF_NORMED = cv2.TM_SQDIFF_NORMED
@@ -11,41 +12,61 @@ TM_CCOEFF_NORMED = cv2.TM_CCOEFF_NORMED
 TM_CCORR_NORMED = cv2.TM_CCORR_NORMED
 
 
+def obtain_tm_results(img, tpl, method):
+    result = cv2.matchTemplate(img, tpl, method)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+        similarity = abs(min_val - 1)
+        position = min_loc
+    else:
+        similarity = max_val
+        position = max_loc
+    return similarity, Spot(position, tpl.shape)
+
+
 class Detection:
 
     def __init__(self, tpl, img=None):
-        self.tpl = tpl
+        self.tpl = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
         if img is None:
-            self.img = np.array(screenshot())[:, :, ::-1].copy()
+            self.img = cv2.cvtColor(np.array(screenshot())[:, :, ::-1].copy(), cv2.COLOR_BGR2GRAY)
         else:
             self.img = img
 
+    def _apply_binary_thresh(self):
+        _, img = cv2.threshold(self.img, 127, 255, cv2.THRESH_BINARY)
+        _, tpl = cv2.threshold(self.tpl, 127, 255, cv2.THRESH_BINARY)
+        return img, tpl
+
     # OpenCV Template Matching
 
-    def tm(self, method, thresh):
-
-        # Create a copy of the images to be used
-        img = self.img.copy()
-        tpl = self.tpl.copy()
-
+    def tm(self, method=cv2.TM_SQDIFF_NORMED, thresh=False):
         if thresh:
-            _, img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
-            _, tpl = cv2.threshold(tpl, 127, 255, cv2.THRESH_BINARY)
-
-        # Apply template Matching with the method
-        res = cv2.matchTemplate(img, tpl, method)
-
-        # Grab the Max and Min values, plus their locations
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-
-        if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-            similarity = abs(min_val - 1)
-            position = min_loc
+            img, tpl = self._apply_binary_thresh()
         else:
-            similarity = max_val
-            position = max_loc
+            img, tpl = self.img, self.tpl
+        return obtain_tm_results(img, tpl, method)
 
-        # Create spot wrapper
-        spot = Spot(position, tpl.shape)
+    def tm_multiscaled(self, method=cv2.TM_SQDIFF_NORMED, thresh=False):
+        if thresh:
+            img, tpl = self._apply_binary_thresh()
+        else:
+            img, tpl = self.img, self.tpl
+        similarity, spot = obtain_tm_results(img, tpl, method)
+
+        tpl_height, tpl_width = tpl.shape[:2]
+        # Iterate through scales, resizing the image/screen and find better match for tpl.
+        for scale in np.linspace(0.2, 2.0, 40)[::-1]:
+            # Resize
+            resized = imutils.resize(img, width=int(img.shape[1] * scale))
+            # if the resized image is smaller than the template, then break from the loop
+            if resized.shape[0] < tpl_height or resized.shape[1] < tpl_width:
+                break
+            # apply tm
+            new_similarity, new_spot = obtain_tm_results(resized, tpl, method)
+            # keep the best match
+            if new_similarity > similarity:
+                similarity = new_similarity
+                spot = new_spot
 
         return similarity, spot
