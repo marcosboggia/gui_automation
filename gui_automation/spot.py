@@ -64,3 +64,14 @@ class Spot:
         new_x = int(self.position[0] + self.tpl_shape[1] / x_modifier * x_multiplier)
         new_y = int(self.position[1] + self.tpl_shape[0] / y_modifier * y_multiplier)
         return new_x, new_y
+
+    def revert_scaled_position_error(self, scale):
+        """
+        If image has been resized this function must be used to fix the displacement of the position to the original
+        image.
+        :param scale: the scale used to resize the image
+        :return: No return
+        """
+        x = self.position[0]
+        y = self.position[1]
+        self.position = (int(x/scale), int(y/scale))
