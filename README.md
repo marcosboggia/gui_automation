@@ -18,7 +18,7 @@ It searches windows 10 key image in the screen with at least a 80% of coincidenc
 
 
 * Brief explaination of GuiAuto class:
-```python
+```
 Parameters
 ----------
 tpl : image/numpy matrix with pixels.
@@ -67,7 +67,8 @@ name would be the filename without the extension.
 image would be the numpy array with the image data loaded with OpenCV.
 
 Path: relative or absolute path where the images are. Must finish with '/'.
-It returns a dictionary with the names of the images as keys, and the images themselves as values.  False if any error.
+It returns a dictionary with the names of the images as keys, and the images themselves as values.
+Returns False if any error.
 ```
 
 * Another made up example with image loader:
