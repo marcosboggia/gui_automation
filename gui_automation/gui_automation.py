@@ -15,7 +15,10 @@ def _detect(func):
     def wrapper(self, *args, **kwargs):
         det = imgd.Detection(self.tpl)
         if self.multiscaled:
-            self.similarity, self.spot = det.tm_multiscaled(self.method, self.thresh)
+            if self.multiscaled is True:
+                self.similarity, self.spot = det.tm_multiscaled(self.method, self.thresh)
+            else:
+                self.similarity, self.spot = det.tm_multiscaled(self.method, self.thresh, *self.multiscaled)
         else:
             self.similarity, self.spot = det.tm(self.method, self.thresh)
         if self.similarity > self.similarity_threshold:
@@ -43,7 +46,7 @@ class GuiAuto:
 
     """
 
-    def __init__(self, tpl=None, similarity_threshold=None, method=imgd.TM_SQDIFF_NORMED, thresh=False, multiscaled=False):
+    def __init__(self, tpl=None, similarity_threshold=None, method=imgd.TM_CCOEFF_NORMED, thresh=False, multiscaled=False):
         """
         Parameters
         ----------
@@ -61,16 +64,15 @@ class GuiAuto:
         multiscaled:
             Applies template match multiple times with different scales of the screen.
         """
-        self.tpl = None
-        self.similarity_threshold = None
-        self.method = None
-        self.thresh = None
-        self.multiscaled = None
-        self.update(tpl, similarity_threshold, method, thresh, multiscaled)
+        self.tpl = tpl
+        self.similarity_threshold = similarity_threshold
+        self.method = method
+        self.thresh = thresh
+        self.multiscaled = multiscaled
         self.similarity = None
         self.spot = None
 
-    def update(self, tpl, similarity_threshold, method=imgd.TM_SQDIFF_NORMED, thresh=False, multiscaled=False):
+    def update(self, tpl, similarity_threshold, method=imgd.TM_CCOEFF_NORMED, thresh=False, multiscaled=False):
         """
         Same parameters as class instantiation. Used to update image to be found and the similarity threshold (instead
         of creating a new instance with these new values) and other parameters optionally.
