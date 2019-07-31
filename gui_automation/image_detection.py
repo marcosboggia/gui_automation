@@ -47,7 +47,7 @@ class Detection:
             img, tpl = self.img, self.tpl
         return obtain_tm_results(img, tpl, method)
 
-    def tm_multiscaled(self, method=cv2.TM_SQDIFF_NORMED, thresh=False):
+    def tm_multiscaled(self, method=cv2.TM_SQDIFF_NORMED, thresh=False, reduce_sc=0.2, magnify_sc=2.0, cant_sc=40):
         if thresh:
             img, tpl = self._apply_binary_thresh()
         else:
@@ -56,7 +56,9 @@ class Detection:
 
         tpl_height, tpl_width = tpl.shape[:2]
         # Iterate through scales, resizing the image/screen and find better match for tpl.
-        for scale in np.linspace(0.2, 2.0, 40)[::-1]:
+        # Reducing up to reduce_sc. Defualt is 0.2, meaning it will resize image to a 0.2 of its size
+        # Magnifying up to magnify_sc. Defualt is 2.0, meaning it will enlarge the image up to a double of its size
+        for scale in np.linspace(reduce_sc, magnify_sc, cant_sc)[::-1]:
             # Resize
             resized = imutils.resize(img, width=int(img.shape[1] * scale))
             # if the resized image is smaller than the template, then break from the loop
@@ -67,6 +69,8 @@ class Detection:
             # keep the best match
             if new_similarity > similarity:
                 similarity = new_similarity
+                # Fix resized image coordinates.
+                new_spot.revert_scaled_position_error(scale)
                 spot = new_spot
 
         return similarity, spot
