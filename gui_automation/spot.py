@@ -49,7 +49,7 @@ class Spot:
 
     def custom_position(self, x_multiplier, x_modifier, y_multiplier, y_modifier):
         """
-        This function helps calculate any coordinate inside the image to be detected.
+        This method helps calculate any coordinate within the image detected.
         Ej: x, y = custom_position(3, 8, 1, 2)
            3/8 of the width
           __o_____

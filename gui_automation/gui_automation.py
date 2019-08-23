@@ -14,13 +14,18 @@ class GuiAuto:
 
     Methods
     ----------
-    detect: returns Spot instance if it finds the tpl in the image. Internally, it keeps the last spot found.
-    move: same as detect but it moves the cursor to the center of the found image withing the screen.
-    click: Clicks the left buttons the quantity specified in @param click(default 1) in the center of the
-                      found image.
-    hold: same as detect_and_click but instead of clicking X times, it holds the click @param time seconds.
-    drag: Drags from one point to another using start and end coordinates.
-    drag_within: Drags from one point to another inside the bounding box of the image found.
+    detect(tpl, img=None):
+        returns Spot instance if it finds the tpl in the image. Internally, it keeps the last spot found.
+    move(coords=None):
+        same as detect but it moves the cursor to the center of the found image withing the screen.
+    click(coords=None):
+        Clicks the left buttons the quantity specified in @param click(default 1) in the center of the found image.
+    hold(coords=None):
+        Same as click but instead of clicking X times, it holds the click @param time seconds.
+    drag(start_coords, end_coords):
+        Drags from one point to another using start and end coordinates.
+    drag_within(start_x_fraction, start_y_fraction, end_x_fraction, end_y_fraction):
+        Drags from one point to another inside the bounding box of the image found.
     For more information read this function documentation.
 
     For move, click, and hold if no coords are given it performs the action on the last spot found.
