@@ -2,3 +2,6 @@
 gui_automation/__pycache__/
 gui_automation/tests/
 example.py
+build/
+dist/
+gui_automation.egg-info/
