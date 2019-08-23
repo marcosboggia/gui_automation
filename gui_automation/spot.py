@@ -1,10 +1,9 @@
 # Made by Marcos Boggia
 
 
-# Wraps all position/coordinates calculations for the found spot.
 class Spot:
     """
-    Spot class, wraps the position of a the found image.
+    Wraps all position/coordinates calculations for the found image.
 
     Available methods:
     upper_left_position()
@@ -13,33 +12,39 @@ class Spot:
     bottom_right_position()
     center_position()
     custom_position(x_multiplier, x_modifier, y_multiplier, y_modifier)
-
     """
     def __init__(self, position, tpl_shape):
-        self.position = position
-        self.tpl_shape = tpl_shape
+        """
+
+        :param position: tuple with x and y coordinates
+        :param tpl_shape: tuple with height and width of the shape
+        """
+        self.x = position[0]
+        self.y = position[1]
+        self.tpl_width = tpl_shape[1]
+        self.tpl_height = tpl_shape[0]
 
     # Position calculations
 
-    def upper_left_position(self):
-        return self.position
+    def upper_left(self):
+        return self.x, self.y
 
-    def upper_right_position(self):
-        new_y = self.position[1] + self.tpl_shape[0]
-        return self.position[0], new_y
+    def upper_right(self):
+        new_y = self.y + self.tpl_height
+        return self.x, new_y
 
-    def bottom_left_position(self):
-        new_x = int(self.position[0] + self.tpl_shape[1])
-        return new_x, self.position[1]
+    def bottom_left(self):
+        new_x = int(self.x + self.tpl_width)
+        return new_x, self.y
 
-    def bottom_right_position(self):
-        new_x = self.position[0] + self.tpl_shape[1]
-        new_y = self.position[1] + self.tpl_shape[0]
+    def bottom_right(self):
+        new_x = self.x + self.tpl_width
+        new_y = self.y + self.tpl_height
         return new_x, new_y
 
-    def center_position(self):
-        new_x = int(self.position[0] + self.tpl_shape[1] / 2)
-        new_y = int(self.position[1] + self.tpl_shape[0] / 2)
+    def center(self):
+        new_x = int(self.x + self.tpl_width / 2)
+        new_y = int(self.y + self.tpl_height / 2)
         return new_x, new_y
 
     def custom_position(self, x_multiplier, x_modifier, y_multiplier, y_modifier):
@@ -61,8 +66,8 @@ class Spot:
         :return:
         new_x, new_y: the calculated coordinates
         """
-        new_x = int(self.position[0] + self.tpl_shape[1] / x_modifier * x_multiplier)
-        new_y = int(self.position[1] + self.tpl_shape[0] / y_modifier * y_multiplier)
+        new_x = int(self.x + self.tpl_width / x_modifier * x_multiplier)
+        new_y = int(self.y + self.tpl_height / y_modifier * y_multiplier)
         return new_x, new_y
 
     def revert_scaled_position_error(self, scale):
@@ -72,6 +77,5 @@ class Spot:
         :param scale: the scale used to resize the image
         :return: No return
         """
-        x = self.position[0]
-        y = self.position[1]
-        self.position = (int(x/scale), int(y/scale))
+        self.x = int(self.x/scale)
+        self.y = int(self.y/scale)
