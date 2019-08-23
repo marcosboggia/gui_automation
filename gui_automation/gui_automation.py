@@ -1,33 +1,11 @@
 # Made by Marcos Boggia
-
-import gui_automation.image_detection as imgd
-import gui_automation.mouse as mouse
-import functools
+from gui_automation.foreground_handler import ForegroundHandler
+from gui_automation.image_detector import TMDetector
 
 
-def _detect(func):
-    """
-
-    :param func: behaviour to inject if the detection fits the similarity threshold
-    :return: decorated function
-    """
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        det = imgd.Detection(self.tpl)
-        if self.multiscaled:
-            if self.multiscaled is True:
-                self.similarity, self.spot = det.tm_multiscaled(self.method, self.thresh)
-            else:
-                self.similarity, self.spot = det.tm_multiscaled(self.method, self.thresh, *self.multiscaled)
-        else:
-            self.similarity, self.spot = det.tm(self.method, self.thresh)
-        if self.similarity > self.similarity_threshold:
-            func(self, *args, **kwargs)
-            return True
-        self.spot = None
-        return False
-
-    return wrapper
+def _values_from_fraction(fraction):
+    """ Used to obtain the numbers from fractions like '3/4' etc. """
+    return int(fraction[0]), int(fraction[2])
 
 
 class GuiAuto:
@@ -36,82 +14,97 @@ class GuiAuto:
 
     Methods
     ----------
-    update: used to replace image to be found, similarity threshold and other parameters.
-    detect: returns True if it finds the tpl in the image.
-    detect_and_move: same as detect but it moves the cursor to the center of the found image withing the screen.
-    detect_and_click: Clicks the left buttons the quantity specified in @param click(default 1) in the center of the
+    detect: returns Spot instance if it finds the tpl in the image. Internally, it keeps the last spot found.
+    move: same as detect but it moves the cursor to the center of the found image withing the screen.
+    click: Clicks the left buttons the quantity specified in @param click(default 1) in the center of the
                       found image.
-    detect_and_hold: same as detect_and_click but instead of clicking X times, it holds the click @param time seconds.
-    detect_and_drag: Drags from one point to another. For more information read this function docstring.
+    hold: same as detect_and_click but instead of clicking X times, it holds the click @param time seconds.
+    drag: Drags from one point to another using start and end coordinates.
+    drag_within: Drags from one point to another inside the bounding box of the image found.
+    For more information read this function documentation.
 
+    For move, click, and hold if no coords are given it performs the action on the last spot found.
     """
 
-    def __init__(self, tpl=None, similarity_threshold=None, method=imgd.TM_CCOEFF_NORMED, thresh=False, multiscaled=False):
+    def __init__(self, detector=TMDetector(), handler=ForegroundHandler()):
         """
-        Parameters
-        ----------
-        tpl : image/numpy matrix with pixels.
-            The image to be found.
-        similarity_threshold:
-            It goes from 0 (no match at all) to 1 (perfect match).
-
-        Optional parameters
-        ----------
-        method: OpenCV TM methods: TM_SQDIFF_NORMED, TM_CCOEFF_NORMED, TM_CCORR_NORMED
-            OpenCV template match method to use. Default is TM_SQDIFF_NORMED.
-        thresh:
-            Apply a binary threshold to images before detection. Default is False.
-        multiscaled:
-            Applies template match multiple times with different scales of the screen.
+        Wraps detection and controlling of the GUI.
+        By default it will use normal detection and foreground app automation.
+        :param detector: detector instance. Default is TMDetector()
+        :param handler:  handler instance. Default is ForegroundHandler()
         """
-        self.tpl = tpl
-        self.similarity_threshold = similarity_threshold
-        self.method = method
-        self.thresh = thresh
-        self.multiscaled = multiscaled
+        self.detector = detector
+        self.handler = handler
         self.similarity = None
         self.spot = None
 
-    def update(self, tpl, similarity_threshold, method=imgd.TM_CCOEFF_NORMED, thresh=False, multiscaled=False):
+    def detect(self, tpl, similarity_threshold, img=None):
         """
-        Same parameters as class instantiation. Used to update image to be found and the similarity threshold (instead
-        of creating a new instance with these new values) and other parameters optionally.
+        :param tpl: image/numpy matrix with pixels. The image to be found.
+        :param similarity_threshold: it goes from 0 (no match at all) to 1 (perfect match).
+        :param img:
+        :return:
         """
-        self.tpl = tpl
-        self.similarity_threshold = similarity_threshold
-        self.method = method
-        self.thresh = thresh
-        self.multiscaled = multiscaled
-        return self
+        if img is None:
+            img = self.handler.screenshot()
+        self.similarity, self.spot = self.detector.detect(tpl, img)
+        if self.similarity > similarity_threshold:
+            return self.spot
+        self.spot = None
+        return False
 
-    @_detect
-    def detect(self):
-        pass
+    def move(self, coords=None):
+        """
+        :param coords: tuple in the form of (x, y) indicating coordinates to perform action.
+        :return:
+        """
+        if coords is None:
+            self.handler.move(*self.spot.center())
+        else:
+            self.handler.move(*coords)
 
-    @_detect
-    def detect_and_move(self):
-        mouse.move(*self.spot.center_position())
+    def click(self, clicks=1, coords=None):
+        """
+        :param coords: tuple in the form of (x, y) indicating coordinates to perform action.
+        :param clicks: how many clicks to perform. Default is 1.
+        :return:
+        """
+        if coords is None:
+            self.handler.click(*self.spot.center(), clicks)
+        else:
+            self.handler.click(*coords)
 
-    @_detect
-    def detect_and_click(self, clicks=1):
-        mouse.click(*self.spot.center_position(), clicks)
+    def hold(self, time, coords=None):
+        """
+        :param coords: tuple in the form of (x, y) indicating coordinates to perform action.
+        :param time: how much time to hold in seconds.
+        :return:
+        """
+        if coords is None:
+            self.handler.hold_click(*self.spot.center(), time)
+        else:
+            self.handler.hold_click(*coords)
 
-    @_detect
-    def detect_and_hold(self, time):
-        mouse.hold_click(*self.spot.center_position(), time)
+    def drag(self, start_coord, end_coord):
+        """
 
-    @_detect
-    def detect_and_drag(self, start_x_fraction, start_y_fraction, end_x_fraction, end_y_fraction):
+        :param start_coord: tuple in the form of (x, y) indicating start coordinates to perform dragging.
+        :param end_coord: tuple in the form of (x, y) indicating end coordinates to end dragging.
+        :return:
+        """
+        self.handler.drag_click(*start_coord, *end_coord)
+
+    def drag_within(self, start_x_fraction, start_y_fraction, end_x_fraction, end_y_fraction):
         """
         @brief Drags the mouse from one point to another using the tpl width and height to calculate starting and ending
                 points. All params are fractions in the following string format: 'number/number'.
-        @example GuiAuto(img, 0.8).detect_and_drag('3/4', '0/1', '7/8', '4/5')
+        @example ga.drag_within('3/4', '0/1', '7/8', '4/5')
 
            3/4 of the width and 0/1 of the height for START
           __o___o_  7/8 of the width for END
          |  S     |   S = start
-         |   \\    |   E = end
-         |    \\   |   \\ = the mouse drag path
+         |   \\   |   E = end
+         |    \\  |   \\ = the mouse drag path
          |      E o 4/5 of the height for END
          |________|
         """
@@ -119,9 +112,4 @@ class GuiAuto:
                                                      *_values_from_fraction(start_y_fraction))
         end_x, end_y = self.spot.custom_position(*_values_from_fraction(end_x_fraction),
                                                  *_values_from_fraction(end_y_fraction))
-        mouse.drag_click(start_x, start_y, end_x, end_y)
-
-
-# Used to obtain the numbers from fractions like '3/4' etc.
-def _values_from_fraction(fraction):
-    return int(fraction[0]), int(fraction[2])
+        self.handler.drag_click(start_x, start_y, end_x, end_y)
