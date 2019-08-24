@@ -52,6 +52,8 @@ class GuiAuto:
         """
         if img is None:
             img = self.handler.screenshot()
+        if img.shape[0] < tpl.shape[0] or img.shape[1] < tpl.shape[1]:
+            return False
         self.similarity, self.spot = self.detector.detect(tpl, img)
         if self.similarity > similarity_threshold:
             return self.spot
@@ -77,7 +79,7 @@ class GuiAuto:
         if coords is None:
             self.handler.click(*self.spot.center(), clicks)
         else:
-            self.handler.click(*coords)
+            self.handler.click(*coords, clicks)
 
     def hold(self, time, coords=None):
         """
@@ -88,7 +90,7 @@ class GuiAuto:
         if coords is None:
             self.handler.hold_click(*self.spot.center(), time)
         else:
-            self.handler.hold_click(*coords)
+            self.handler.hold_click(*coords, time)
 
     def drag(self, start_coord, end_coord):
         """
