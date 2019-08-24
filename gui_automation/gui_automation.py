@@ -47,7 +47,7 @@ class GuiAuto:
         """
         :param tpl: image/numpy matrix with pixels. The image to be found.
         :param similarity_threshold: it goes from 0 (no match at all) to 1 (perfect match).
-        :param img:
+        :param img: image where the tpl must be searched.
         :return:
         """
         if img is None:
