@@ -113,6 +113,15 @@ class BackgroundHandlerWin32(Handler):
         self.hwnd.drag_mouse(press_coords=(start_x + self.x_dis, start_y + self.y_dis),
                              release_coords=(end_x + self.x_dis, end_y + self.y_dis))
 
+    def press_key(self, key):
+        print("Not implemented yet")
+
+    def press_hotkey(self, *keys):
+        print("Not implemented yet")
+
+    def write_string(self, key):
+        print("Not implemented yet")
+
     @staticmethod
     def get_gui_elem(app_name, *args):
         """

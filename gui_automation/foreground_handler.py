@@ -40,3 +40,16 @@ class ForegroundHandler(Handler):
     def drag_click(start_x, start_y, end_x, end_y):
         pyautogui.moveTo(x=start_x, y=start_y)
         pyautogui.dragTo(x=end_x, y=end_y, button='left', duration=1)
+
+    @staticmethod
+    def press_key(key):
+        pyautogui.press(key)
+
+    @staticmethod
+    def press_hotkey(*keys):
+        pyautogui.hotkey(*keys)
+
+    @staticmethod
+    def write_string(key):
+        pyautogui.write(key)
+

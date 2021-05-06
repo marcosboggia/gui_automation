@@ -120,3 +120,12 @@ class GuiAuto:
         end_x, end_y = self.spot.custom_position(*_values_from_fraction(end_x_fraction),
                                                  *_values_from_fraction(end_y_fraction))
         self.handler.drag_click(start_x, start_y, end_x, end_y)
+
+    def press_key(self, key):
+        self.handler.press_key(key)
+
+    def press_hotkey(self, *keys):
+        self.handler.press_hotkey(*keys)
+
+    def write_string(self, key):
+        self.handler.write_string(key)

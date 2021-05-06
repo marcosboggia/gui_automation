@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
     name='gui_automation',
-    version='3.0.3',
+    version='3.1.0',
     author="Marcos Boggia",
     author_email="marcos_boggia@hotmail.com",
     description="Simple python library useful for automating tasks using images.",
@@ -15,7 +15,11 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'opencv-python',
-        'PyAutoGUI'
+        'PyAutoGUI',
+        'imutils',
+        'pywin32',
+        'pywin32-ctypes',
+        'pywinauto'
     ],
     classifiers=[
      "Programming Language :: Python :: 3",
