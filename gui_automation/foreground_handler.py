@@ -50,6 +50,6 @@ class ForegroundHandler(Handler):
         pyautogui.hotkey(*keys)
 
     @staticmethod
-    def write_string(key):
-        pyautogui.write(key)
+    def write_string(key, interval):
+        pyautogui.write(key, interval)
 

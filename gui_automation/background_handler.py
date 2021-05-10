@@ -119,7 +119,7 @@ class BackgroundHandlerWin32(Handler):
     def press_hotkey(self, *keys):
         print("Not implemented yet")
 
-    def write_string(self, key):
+    def write_string(self, key, interval=0):
         print("Not implemented yet")
 
     @staticmethod

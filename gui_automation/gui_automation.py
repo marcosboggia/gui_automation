@@ -127,5 +127,5 @@ class GuiAuto:
     def press_hotkey(self, *keys):
         self.handler.press_hotkey(*keys)
 
-    def write_string(self, key):
-        self.handler.write_string(key)
+    def write_string(self, key, interval=0.0):
+        self.handler.write_string(key, interval)
