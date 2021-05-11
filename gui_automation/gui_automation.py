@@ -1,11 +1,25 @@
 # Made by Marcos Boggia
 from gui_automation.foreground_handler import ForegroundHandler
 from gui_automation.image_detector import TMDetector
+import functools
 
 
 def _values_from_fraction(fraction):
     """ Used to obtain the numbers from fractions like '3/4' etc. """
     return int(fraction[0]), int(fraction[2])
+
+
+def add_behaviour(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if self.before_actions is not None:
+            self.before_actions()
+        return_value = func(*args, **kwargs)
+        if self.after_actions is not None:
+            self.after_actions()
+        return return_value
+
+    return wrapper
 
 
 class GuiAuto:
@@ -42,6 +56,8 @@ class GuiAuto:
         self.handler = handler
         self.similarity = None
         self.spot = None
+        self.before_actions = None
+        self.after_actions = None
 
     def detect(self, tpl, similarity_threshold, img=None):
         """
@@ -60,6 +76,7 @@ class GuiAuto:
         self.spot = None
         return False
 
+    @add_behaviour
     def move(self, coords=None):
         """
         :param coords: tuple in the form of (x, y) indicating coordinates to perform action.
@@ -70,6 +87,7 @@ class GuiAuto:
         else:
             self.handler.move(*coords)
 
+    @add_behaviour
     def click(self, clicks=1, coords=None):
         """
         :param coords: tuple in the form of (x, y) indicating coordinates to perform action.
@@ -81,6 +99,7 @@ class GuiAuto:
         else:
             self.handler.click(*coords, clicks)
 
+    @add_behaviour
     def hold(self, time, coords=None):
         """
         :param coords: tuple in the form of (x, y) indicating coordinates to perform action.
@@ -92,6 +111,7 @@ class GuiAuto:
         else:
             self.handler.hold_click(*coords, time)
 
+    @add_behaviour
     def drag(self, start_coord, end_coord):
         """
 
@@ -101,6 +121,7 @@ class GuiAuto:
         """
         self.handler.drag_click(*start_coord, *end_coord)
 
+    @add_behaviour
     def drag_within(self, start_x_fraction, start_y_fraction, end_x_fraction, end_y_fraction):
         """
         @brief Drags the mouse from one point to another using the tpl width and height to calculate starting and ending
@@ -121,11 +142,14 @@ class GuiAuto:
                                                  *_values_from_fraction(end_y_fraction))
         self.handler.drag_click(start_x, start_y, end_x, end_y)
 
+    @add_behaviour
     def press_key(self, key):
         self.handler.press_key(key)
 
+    @add_behaviour
     def press_hotkey(self, *keys):
         self.handler.press_hotkey(*keys)
 
+    @add_behaviour
     def write_string(self, key, interval=0.0):
         self.handler.write_string(key, interval)
