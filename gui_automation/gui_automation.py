@@ -14,7 +14,7 @@ def add_behaviour(func):
     def wrapper(self, *args, **kwargs):
         if self.before_actions is not None:
             self.before_actions()
-        return_value = func(*args, **kwargs)
+        return_value = func(self, *args, **kwargs)
         if self.after_actions is not None:
             self.after_actions()
         return return_value
